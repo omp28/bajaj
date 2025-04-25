@@ -25,14 +25,6 @@ const FilterPanel: React.FC = () => {
     }
   }, [doctors]);
 
-  const handleSpecialtyChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    specialty: string
-  ) => {
-    e.preventDefault();
-    toggleSpecialty(specialty);
-  };
-
   return (
     <div className="w-64 bg-white p-4 border border-gray-200 rounded-md">
       <div className="mb-6">
@@ -75,16 +67,15 @@ const FilterPanel: React.FC = () => {
         </h3>
         <div className="space-y-2 max-h-60 overflow-y-auto">
           {availableSpecialties.map((specialty) => (
-            <label key={specialty} className="flex items-center">
+            <label key={specialty} className="flex items-center cursor-pointer">
               <input
                 type="checkbox"
                 data-testid={`filter-specialty-${specialty}`}
                 checked={filters.specialties.includes(specialty)}
-                onChange={(e) => handleSpecialtyChange(e, specialty)}
-                onClick={(e) => e.stopPropagation()}
+                onChange={() => toggleSpecialty(specialty)}
                 className="mr-2"
               />
-              {specialty}
+              <span>{specialty}</span>
             </label>
           ))}
         </div>

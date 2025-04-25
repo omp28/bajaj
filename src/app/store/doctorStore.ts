@@ -63,26 +63,25 @@ export const useDoctorStore = create<DoctorStore>((set, get) => ({
     get().applyFilters();
   },
 
-
-toggleSpecialty: (specialty: string) => {
-  set((state) => {
-
-    const specialtyExists = state.filters.specialties.includes(specialty);
+  toggleSpecialty: (specialty: string) => {
+    set((state) => {
+      const specialtyExists = state.filters.specialties.includes(specialty);
+      
+      const updatedSpecialties = specialtyExists
+        ? state.filters.specialties.filter(s => s !== specialty)
+        : [...state.filters.specialties, specialty];
+      
+      return {
+        filters: {
+          ...state.filters,
+          specialties: updatedSpecialties,
+        }
+      };
+    });
     
-    const updatedSpecialties = specialtyExists
-      ? state.filters.specialties.filter(s => s !== specialty)
-      : [...state.filters.specialties, specialty];
-    
-    return {
-      filters: {
-        ...state.filters,
-        specialties: updatedSpecialties,
-      }
-    };
-  });
-  
-  setTimeout(() => get().applyFilters(), 0);
-},
+
+    get().applyFilters();
+  },
 
   setSortOption: (option: SortOption | null) => {
     set((state) => ({
@@ -95,66 +94,60 @@ toggleSpecialty: (specialty: string) => {
   },
 
   clearFilters: () => {
-  set({
-    filters: {
-      consultationType: null,
-      specialties: [],
-      sortBy: null,
-      searchQuery: '',
-    }
-  });
-  get().applyFilters();
-},
-
-
-
-
-applyFilters: () => {
-  set((state) => {
-    const { doctors, filters } = state;
-    let filtered = [...doctors];
-    
-
-    if (filters.searchQuery) {
-      const query = filters.searchQuery.toLowerCase();
-      filtered = filtered.filter(doctor => 
-        doctor.name.toLowerCase().includes(query)
-      );
-    }
-    
-
-    if (filters.consultationType) {
-      if (filters.consultationType === 'Video Consult') {
-        filtered = filtered.filter(doctor => doctor.video_consult);
-      } else if (filters.consultationType === 'In Clinic') {
-        filtered = filtered.filter(doctor => doctor.in_clinic);
+    set({
+      filters: {
+        consultationType: null,
+        specialties: [],
+        sortBy: null,
+        searchQuery: '',
       }
-    }
-    
-    if (filters.specialties.length > 0) {
-      filtered = filtered.filter(doctor => 
-        filters.specialties.some(specialty => 
-          doctor.specialities.some(s => s.name === specialty)
-        )
-      );
-    }
-    
-    
-    if (filters.sortBy === 'fees') {
-      filtered.sort((a, b) => {
-        const aFee = parseInt(a.fees.replace(/[^\d]/g, ''));
-        const bFee = parseInt(b.fees.replace(/[^\d]/g, ''));
-        return aFee - bFee;
-      });
-    } else if (filters.sortBy === 'experience') {
-      filtered.sort((a, b) => {
-        const aExp = parseInt(a.experience.match(/\d+/)?.[0] || '0');
-        const bExp = parseInt(b.experience.match(/\d+/)?.[0] || '0');
-        return bExp - aExp;
-      });
-    }
-    
-    return { filteredDoctors: filtered };
-  });
-}
+    });
+    get().applyFilters();
+  },
+
+  applyFilters: () => {
+    set((state) => {
+      const { doctors, filters } = state;
+      let filtered = [...doctors];
+      
+      if (filters.searchQuery) {
+        const query = filters.searchQuery.toLowerCase();
+        filtered = filtered.filter(doctor => 
+          doctor.name.toLowerCase().includes(query)
+        );
+      }
+      
+      if (filters.consultationType) {
+        if (filters.consultationType === 'Video Consult') {
+          filtered = filtered.filter(doctor => doctor.video_consult);
+        } else if (filters.consultationType === 'In Clinic') {
+          filtered = filtered.filter(doctor => doctor.in_clinic);
+        }
+      }
+      
+      if (filters.specialties.length > 0) {
+        filtered = filtered.filter(doctor => 
+          filters.specialties.some(specialty => 
+            doctor.specialities.some(s => s.name === specialty)
+          )
+        );
+      }
+      
+      if (filters.sortBy === 'fees') {
+        filtered.sort((a, b) => {
+          const aFee = parseInt(a.fees.replace(/[^\d]/g, ''));
+          const bFee = parseInt(b.fees.replace(/[^\d]/g, ''));
+          return aFee - bFee;
+        });
+      } else if (filters.sortBy === 'experience') {
+        filtered.sort((a, b) => {
+          const aExp = parseInt(a.experience.match(/\d+/)?.[0] || '0');
+          const bExp = parseInt(b.experience.match(/\d+/)?.[0] || '0');
+          return bExp - aExp;
+        });
+      }
+      
+      return { filteredDoctors: filtered };
+    });
+  }
 }));
