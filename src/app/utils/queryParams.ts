@@ -1,5 +1,5 @@
-import { Filters, ConsultationType, SortOption } from '../types/doctor';
-import { useSearchParams, useRouter, usePathname } from 'next/navigation'; // Changed import
+import { ConsultationType, SortOption } from '../types/doctor';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'; 
 import { useEffect } from 'react';
 import { useDoctorStore } from '../store/doctorStore';
 

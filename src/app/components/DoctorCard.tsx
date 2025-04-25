@@ -8,8 +8,6 @@ interface DoctorCardProps {
 const DoctorCard: React.FC<DoctorCardProps> = ({ doctor }) => {
   const specialties = doctor.specialities.map((s) => s.name).join(", ");
 
-  const experienceYears = doctor.experience.match(/\d+/)?.[0] || "";
-
   return (
     <div
       data-testid="doctor-card"

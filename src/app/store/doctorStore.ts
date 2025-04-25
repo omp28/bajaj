@@ -95,16 +95,17 @@ toggleSpecialty: (specialty: string) => {
   },
 
   clearFilters: () => {
-    set((state) => ({
-      filters: {
-        consultationType: null,
-        specialties: [],
-        sortBy: null,
-        searchQuery: '',
-      }
-    }));
-    get().applyFilters();
-  },
+  set({
+    filters: {
+      consultationType: null,
+      specialties: [],
+      sortBy: null,
+      searchQuery: '',
+    }
+  });
+  get().applyFilters();
+},
+
 
 
 
