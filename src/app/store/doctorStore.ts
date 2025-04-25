@@ -63,21 +63,26 @@ export const useDoctorStore = create<DoctorStore>((set, get) => ({
     get().applyFilters();
   },
 
-  toggleSpecialty: (specialty: string) => {
-    set((state) => {
-      const specialties = state.filters.specialties.includes(specialty)
-        ? state.filters.specialties.filter(s => s !== specialty)
-        : [...state.filters.specialties, specialty];
 
-      return {
-        filters: {
-          ...state.filters,
-          specialties,
-        }
-      };
-    });
-    get().applyFilters();
-  },
+toggleSpecialty: (specialty: string) => {
+  set((state) => {
+
+    const specialtyExists = state.filters.specialties.includes(specialty);
+    
+    const updatedSpecialties = specialtyExists
+      ? state.filters.specialties.filter(s => s !== specialty)
+      : [...state.filters.specialties, specialty];
+    
+    return {
+      filters: {
+        ...state.filters,
+        specialties: updatedSpecialties,
+      }
+    };
+  });
+  
+  setTimeout(() => get().applyFilters(), 0);
+},
 
   setSortOption: (option: SortOption | null) => {
     set((state) => ({
@@ -101,40 +106,54 @@ export const useDoctorStore = create<DoctorStore>((set, get) => ({
     get().applyFilters();
   },
 
-  applyFilters: () => {
-    set((state) => {
-      const { doctors, filters } = state;
-      let filtered = [...doctors];
-      
-      if (filters.searchQuery) {
-        const query = filters.searchQuery.toLowerCase();
-        filtered = filtered.filter(doctor => 
-          doctor.name.toLowerCase().includes(query)
-        );
+
+
+applyFilters: () => {
+  set((state) => {
+    const { doctors, filters } = state;
+    let filtered = [...doctors];
+    
+
+    if (filters.searchQuery) {
+      const query = filters.searchQuery.toLowerCase();
+      filtered = filtered.filter(doctor => 
+        doctor.name.toLowerCase().includes(query)
+      );
+    }
+    
+
+    if (filters.consultationType) {
+      if (filters.consultationType === 'Video Consult') {
+        filtered = filtered.filter(doctor => doctor.video_consult);
+      } else if (filters.consultationType === 'In Clinic') {
+        filtered = filtered.filter(doctor => doctor.in_clinic);
       }
-      
-      if (filters.consultationType) {
-        filtered = filtered.filter(doctor => 
-          doctor.consultationType === filters.consultationType || 
-          doctor.consultationType === 'Both'
-        );
-      }
-      
-      if (filters.specialties.length > 0) {
-        filtered = filtered.filter(doctor => 
-          filters.specialties.some(specialty => 
-            doctor.specialty.includes(specialty)
-          )
-        );
-      }
-      
-      if (filters.sortBy === 'fees') {
-        filtered.sort((a, b) => a.fee - b.fee);
-      } else if (filters.sortBy === 'experience') {
-        filtered.sort((a, b) => b.experience - a.experience);
-      }
-      
-      return { filteredDoctors: filtered };
-    });
-  }
+    }
+    
+    if (filters.specialties.length > 0) {
+      filtered = filtered.filter(doctor => 
+        filters.specialties.some(specialty => 
+          doctor.specialities.some(s => s.name === specialty)
+        )
+      );
+    }
+    
+    
+    if (filters.sortBy === 'fees') {
+      filtered.sort((a, b) => {
+        const aFee = parseInt(a.fees.replace(/[^\d]/g, ''));
+        const bFee = parseInt(b.fees.replace(/[^\d]/g, ''));
+        return aFee - bFee;
+      });
+    } else if (filters.sortBy === 'experience') {
+      filtered.sort((a, b) => {
+        const aExp = parseInt(a.experience.match(/\d+/)?.[0] || '0');
+        const bExp = parseInt(b.experience.match(/\d+/)?.[0] || '0');
+        return bExp - aExp;
+      });
+    }
+    
+    return { filteredDoctors: filtered };
+  });
+}
 }));
